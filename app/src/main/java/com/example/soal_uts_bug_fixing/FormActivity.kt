@@ -21,13 +21,14 @@ class FormActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityFormBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        gendersArray = resources.getStringArray()
+        gendersArray = resources.getStringArray(R.array.gender_descriptions)
         // Gunakan array yang sudah di buat di folder values
 
 
         with(binding){
             val adapterGenders = ArrayAdapter(this@FormActivity, R.layout.custom_spinner, gendersArray)
             adapterGenders.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            genderSpinner.apply { adapter = adapterGenders }
             //
 
             genderSpinner.onItemSelectedListener =
@@ -45,11 +46,12 @@ class FormActivity : AppCompatActivity() {
             submitBtn.setOnClickListener(){
                 if(fieldNotEmpty()){
                     val intentToAppointment = Intent(this@FormActivity, AppointmentActivity::class.java)
-                    intentToAppointment.putExtra(EXTRA_NAMA, namaEdt.text.toString())
-                    intentToAppointment.putExtra(EXTRA_IDENTITAS, identitasEdt.text.toString())
-                    intentToAppointment.putExtra(EXTRA_GENDER, genderInput)
-                    intentToAppointment.putExtra(EXTRA_KELUHAN, keluhanEdt.text.toString())
-                    //
+                    intentToAppointment.putExtra("EXTRA_NAMA", namaEdt.text.toString())
+                    intentToAppointment.putExtra("EXTRA_TEXT", identitasEdt.text.toString())
+                    intentToAppointment.putExtra("EXTRA_GENDER", genderInput)
+                    intentToAppointment.putExtra("EXTRA_IDENTITAS", identitasEdt.text.toString())
+                    intentToAppointment.putExtra("EXTRA_KELUHAN", keluhanEdt.text.toString())
+                    startActivity(intentToAppointment)
                 }else{
                     Toast.makeText(this@FormActivity, "MASIH ADA KOLOM YANG KOSONG", Toast.LENGTH_SHORT).show()
                 }

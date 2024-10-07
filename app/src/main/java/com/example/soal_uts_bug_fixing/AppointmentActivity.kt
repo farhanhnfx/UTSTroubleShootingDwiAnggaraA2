@@ -29,9 +29,9 @@ class AppointmentActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListe
     companion object{
         const val EXTRA_TELEFON = "extra_phone"
         const val EXTRA_ALAMAT = "extra_alamat"
-        const val EXTRA_TIPE = "extra_tipe"
-        const val EXTRA_TANGGAL = "extra_tanggal"
-        const val EXTRA_WAKTU = "extra_waktu"
+        var EXTRA_TIPE = "extra_tipe"
+        var EXTRA_TANGGAL = "extra_tanggal"
+        var EXTRA_WAKTU = "extra_waktu"
     }
 
     private lateinit var dateInput : String
@@ -48,21 +48,21 @@ class AppointmentActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListe
         tipePertemuan =""
 
         with(binding){
-
-            tombolKalender.setOnClickListener {
+//fix bame reference to button in xml
+            kalenderTxt.setOnClickListener {
                 val datePicker = DatePicker()
                 datePicker.show(supportFragmentManager, "datePicker")
             }
 
-            tombolJam.setOnClickListener {
+            timerTxt.setOnClickListener {
                 val timePicker = TimePicker()
                 timePicker.show(supportFragmentManager, "timePicker")
             }
 
-            tombolSubmit.setOnClickListener {
+            submitBtn.setOnClickListener {
                 if(fieldNotEmpty()){
                     val dialog = DialogExit()
-                    //
+                    dialog.show(supportFragmentManager, "DialogEit")
                 }else{
                     Toast.makeText(this@AppointmentActivity, "MASIH ADA KOLOM YANG KOSONG", Toast.LENGTH_SHORT).show()
                 }
@@ -92,34 +92,39 @@ class AppointmentActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListe
 
     override fun onDateSet(p0: android.widget.DatePicker?, day: Int, month: Int, year:
     Int) {
-        //
+        dateInput = "$day/$month/$year"
+        binding.kalenderTxt.text = dateInput
     }
 
     override fun onTimeSet(p0: android.widget.TimePicker?, hour: Int, menit:Int) {
-        timeInput = String.format("%02d:%02d", hour, minute)
+//        fix nama variabel yg digunakan dari parameter
+        timeInput = String.format("%02d:%02d", hour, menit)
         binding.timerTxt.text = timeInput
     }
 
 
 //  AKSI SETELAH KONFIRMASI DIALOG BOX
     override fun onDialogResult(result: Boolean) {
-        val nama = intent.getStringExtra(FormActivity.EXTRA_NAMA)
-        val identitas = intent.getStringExtra(FormActivity.EXTRA_IDENTITAS)
-        val gender = intent.getStringExtra(FormActivity.EXTRA_GENDER)
+        val nama = intent.getStringExtra("EXTRA_NAMA")
+        val identitas = intent.getStringExtra("EXTRA_IDENTITAS")
+        val gender = intent.getStringExtra("EXTRA_GENDER")
 
             if (result) {
                 val intentToResult = Intent(this@AppointmentActivity, ResultActivity::class.java)
-                intentToResult.putExtra(EXTRA_TELEFON, binding.kontakEdt.text.toString())
-                intentToResult.putExtra(EXTRA_TANGGAL, binding.kalenderTxt.text.toString())
-                (EXTRA_WAKTU, binding.timerTxt.text.toString())
-                (EXTRA_TIPE, tipePertemuan)
+                intentToResult.putExtra("EXTRA_TELEFON", binding.kontakEdt.text.toString())
+                intentToResult.putExtra("EXTRA_TANGGAL", binding.kalenderTxt.text.toString())
+                intentToResult.putExtra("EXTRA_WAKTU", binding.timerTxt.text.toString())
+                EXTRA_WAKTU = binding.timerTxt.text.toString()
+                EXTRA_TIPE = tipePertemuan
 
-                intentToResult.putExtra(FormActivity.EXTRA_NAMA, nama)
-                intentToResult.putExtra(FormActivity.EXTRA_IDENTITAS, identitas)
-                intentToResult.putExtra(FormActivity.EXTRA_GENDER, gender)
+                intentToResult.putExtra("EXTRA_NAMA", nama)
+                intentToResult.putExtra("EXTRA_IDENTITAS", identitas)
+                intentToResult.putExtra("EXTRA_GENDER", gender)
 
                 if(tipePertemuan=="Offline"){
-                    intentToResult.putExtra(EXTRA_ALAMAT, binding.lokasiEdt.text.toString())
+                    intentToResult.putExtra("EXTRA_ALAMAT", binding.lokasiEdt.text.toString())
+                }else{
+                    intentToResult.putExtra("EXTRA_ALAMAT", tipePertemuan)
                 }
                 startActivity(intentToResult)
             }
@@ -148,7 +153,9 @@ class AppointmentActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListe
 class DatePicker: DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val calendar = Calendar.getInstance()
-        //
+        val year = calendar.get(Calendar.YEAR)
+        val monthOfYear = calendar.get(Calendar.MONTH)
+        val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         //
         //
         return DatePickerDialog(
@@ -162,7 +169,38 @@ class DatePicker: DialogFragment() {
 }
 
 class TimePicker: DialogFragment() {
-//
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val calendar = Calendar.getInstance()
+        val hourOfDay = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+
+        val timePickerDialog = TimePickerDialog(
+            requireActivity(),
+            activity as TimePickerDialog.OnTimeSetListener,
+            hourOfDay,
+            minute,
+            DateFormat.is24HourFormat(activity)
+        )
+
+        // Switch to the input mode after the dialog is shown
+        timePickerDialog.setOnShowListener {
+            try {
+                // Get the TimePicker object inside TimePickerDialog using reflection
+                val timePickerField = TimePickerDialog::class.java.getDeclaredField("mTimePicker")
+                timePickerField.isAccessible = true
+                val timePicker = timePickerField.get(timePickerDialog) as TimePicker
+
+                // Now switch the TimePicker to input mode
+                val method = TimePicker::class.java.getDeclaredMethod("setHourMode", Boolean::class.javaPrimitiveType)
+                method.isAccessible = true
+                method.invoke(timePicker, true) // Set to true for input mode
+            } catch (e: Exception) {
+                e.printStackTrace() // Handle possible reflection errors
+            }
+        }
+
+        return timePickerDialog
+    }
 }
 
 class DialogExit : DialogFragment() {

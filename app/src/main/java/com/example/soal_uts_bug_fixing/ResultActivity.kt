@@ -17,10 +17,13 @@ class ResultActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        val tipe = intent.getStringExtra(AppointmentActivity.EXTRA_TIPE)
-        val alamat = intent.getStringExtra(AppointmentActivity.EXTRA_ALAMAT)
-        val tanggal = intent.getStringExtra(AppointmentActivity.EXTRA_TANGGAL)
-        val waktu = intent.getStringExtra(AppointmentActivity.EXTRA_WAKTU)
+        val tipe = intent.getStringExtra("EXTRA_TIPE")
+        val alamat = intent.getStringExtra("EXTRA_ALAMAT")
+        val tanggal = intent.getStringExtra("EXTRA_TANGGAL")
+        val waktu = intent.getStringExtra("EXTRA_WAKTU")
+        val nama = intent.getStringExtra("EXTRA_NAMA")
+        val identitas = intent.getStringExtra("EXTRA_IDENTITAS")
+        val gender = intent.getStringExtra("EXTRA_GENDER")
 
 
         with(binding){
@@ -28,6 +31,9 @@ class ResultActivity : AppCompatActivity() {
             identitasTxt.text = identitas
             genderTxt.text = gender
             tipeTxt.text = tipe
+            waktuTxt.text = waktu
+            tanggalTxt.text = tanggal
+            tipeTxt.text = alamat
             if(tipe=="Offline"){
                 lokasiTitle.visibility = View.VISIBLE
                 lokasiTxt.visibility = View.VISIBLE
